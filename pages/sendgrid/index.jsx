@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 export default function SendGrid() {
   const [status, setStatus] = useState({
@@ -11,6 +12,8 @@ export default function SendGrid() {
     email: '',
     message: '',
   });
+
+  const { register, handleSubmit, errors } = useForm();
 
   const handleResponse = (status, msg) => {
     if (status === 200) {
@@ -43,7 +46,7 @@ export default function SendGrid() {
     });
   };
 
-  const handleOnSubmit = async (e) => {
+  const handleOnSubmit = async ({}, e) => {
     e.preventDefault();
     setStatus((prevStatus) => ({ ...prevStatus, submitting: true }));
     const res = await fetch('/api/sendgrid/contactus', {
@@ -59,22 +62,28 @@ export default function SendGrid() {
 
   return (
     <main>
-      <form onSubmit={handleOnSubmit}>
+      <form onSubmit={handleSubmit(handleOnSubmit)} noValidate>
         <label htmlFor="email">Email</label>
         <input
           id="email"
           type="email"
           onChange={handleOnChange}
-          required
+          name="email"
+          ref={register({ required: 'this field is required' })}
           value={inputs.email}
         />
+        {errors.email && <span>{errors.email.message}</span>}
+
         <label htmlFor="message">Message</label>
         <textarea
           id="message"
           onChange={handleOnChange}
-          required
           value={inputs.message}
+          name="message"
+          ref={register({ required: 'this field is required' })}
         />
+        {errors.message && <span>{errors.message.message}</span>}
+
         <button type="submit" disabled={status.submitting}>
           {!status.submitting
             ? !status.submitted
